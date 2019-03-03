@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { User } from '../models/user';
-import { Observable, of, from, Subject } from 'rxjs';
-import { map, mergeMap, toArray, takeUntil } from 'rxjs/operators';
+import { Observable, of, from, Subject, throwError } from 'rxjs';
+import { map, mergeMap, toArray, takeUntil, catchError } from 'rxjs/operators';
 import { Users } from '../services/users';
 import { v4 as uuid } from 'uuid';
 interface UserView extends User {
@@ -57,9 +57,13 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this.users$ = of(Users);
   }
   private getUsersView(): Observable<UserView[]> {
-    return of(Users).pipe(mergeMap(item => item), map(user => {
-      return { ...user, selected: false };
-    }), toArray());
+    return of(Users).pipe(
+      mergeMap(item => item),
+      map(user => {
+        return { ...user, selected: false };
+      }),
+      toArray(),
+      catchError(error => throwError('Error ' + error)));
   }
 
 }
