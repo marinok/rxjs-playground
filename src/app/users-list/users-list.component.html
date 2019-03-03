@@ -1,0 +1,7 @@
+<div class="mb24">
+  <div *ngFor="let user of users" class="mb16">
+    {{user.name}}
+    <input type="email" [(ngModel)]="user.email" #ctrl="ngModel" (ngModelChange)="compareArrays()" />
+  </div>
+</div>
+<button mat-stroked-button color="primary" [disabled]="usersArrNotChanged">Save changes {{usersArrNotChanged}}</button>
