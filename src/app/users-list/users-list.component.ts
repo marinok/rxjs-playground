@@ -1,22 +1,26 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { User } from '../models/user';
-import { Observable, of, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { Observable, of, from, Subject } from 'rxjs';
+import { map, mergeMap, toArray, takeUntil } from 'rxjs/operators';
 import { Users } from '../services/users';
-
+import { v4 as uuid } from 'uuid';
+interface UserView extends User {
+  selected?: boolean;
+}
 @Component({
   selector: 'app-users-list',
   templateUrl: './users-list.component.html',
   styleUrls: ['./users-list.component.less']
 })
 export class UsersListComponent implements OnInit, OnDestroy {
-  public usersOrigin: Array<User>;
-  public users$: Observable<User[]>;
-  public users: Array<User>;
+  public users$: Observable<UserView[]>;
+  public users: Array<UserView>;
+  public usersView: Array<UserView>;
   public usersArrNotChanged: boolean = true;
 
-  private ngUnsubscribe  = new Subject();
-  
+  private usersOrigin: Array<UserView>;
+  private ngUnsubscribe = new Subject();
+
   constructor() { }
 
   ngOnInit() {
@@ -24,17 +28,38 @@ export class UsersListComponent implements OnInit, OnDestroy {
     this.users$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(data => {
       this.users = data;
     });
+
+    this.getUsersView().subscribe(item => {
+      console.log('item', item);
+      this.usersView = item;
+    });
   }
   ngOnDestroy() {
-    // when the component get's destroyed, unsubscribe all the subscriptions
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
-}
+  }
   public compareArrays(): void {
     this.usersArrNotChanged = JSON.stringify(this.users) === JSON.stringify(this.usersOrigin);
   }
+  public saveChanges(): void {
+    this.usersOrigin = this.users.map(user => ({ id: user.id, name: user.name, email: user.email }));
+    this.compareArrays();
+  }
+  public addUser(): void {
+    Users.push({
+      id: uuid(),
+      name: 'Lisa Nuor',
+      email: 'lisa@domainname.com'
+    });
+  }
   private getUsers(): void {
-    this.usersOrigin = Users.map(user => {return {id: user.id, name: user.name, email: user.email }});
+    this.usersOrigin = Users.map(user => ({ id: user.id, name: user.name, email: user.email }));
     this.users$ = of(Users);
   }
+  private getUsersView(): Observable<UserView[]> {
+    return of(Users).pipe(mergeMap(item => item), map(user => {
+      return { ...user, selected: false };
+    }), toArray());
+  }
+
 }
