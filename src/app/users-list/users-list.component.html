@@ -1,16 +1,20 @@
-<div class="mb24">
-  <div *ngFor="let user of usersView" class="mb16 flex m-row">
-    <mat-checkbox [(ngModel)]="user.selected"></mat-checkbox>
-    <div class="ml8">
-      <div class="mb4">Name: {{user.name}}</div>
-      Email: <mat-form-field>
-        <input matInput type="email" [(ngModel)]="user.email" #ctrl="ngModel" (ngModelChange)="compareArrays()" />
-      </mat-form-field>
+<div class="flex">
+  <div class="mb24">
+    <div *ngFor="let user of usersView, last as last" class="mb16 flex m-row" [ngClass]="{mb24: last}">
+      <mat-checkbox [(ngModel)]="user.selected" (change)="updateSelectedArr()"></mat-checkbox>
+      <div class="ml8">
+        <div class="mb4">Name: {{user.name}}</div>
+        Email: <mat-form-field>
+          <input matInput type="email" [(ngModel)]="user.email" #ctrl="ngModel" (ngModelChange)="compareArrays()" />
+        </mat-form-field>
+      </div>
     </div>
+    <button mat-stroked-button color="primary" [disabled]="usersArrNotChanged" (click)="saveChanges()">Save changes
+      {{usersArrNotChanged}}</button>
+    <button mat-stroked-button color="primary" class="ml8" (click)="addUser()">Add
+      user</button>
   </div>
-
+  <ul class="ml16">
+    <li *ngFor="let selectedUser of selectedUsers">{{selectedUser.name}}</li>
+  </ul>
 </div>
-<button mat-stroked-button color="primary" [disabled]="usersArrNotChanged" (click)="saveChanges()">Save changes
-  {{usersArrNotChanged}}</button>
-<button mat-stroked-button color="primary" class="ml8" (click)="addUser()">Add
-  user</button>

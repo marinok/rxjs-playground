@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { User } from '../models/user';
 import { Observable, of, from, Subject, throwError } from 'rxjs';
-import { map, mergeMap, toArray, takeUntil, catchError } from 'rxjs/operators';
+import { map, mergeMap, toArray, filter, takeUntil, catchError } from 'rxjs/operators';
 import { Users } from '../services/users';
 import { v4 as uuid } from 'uuid';
 interface UserView extends User {
@@ -13,6 +13,7 @@ interface UserView extends User {
   styleUrls: ['./users-list.component.less']
 })
 export class UsersListComponent implements OnInit, OnDestroy {
+  public selectedUsers: Array<UserView>;
   public users$: Observable<UserView[]>;
   public users: Array<UserView>;
   public usersView: Array<UserView>;
@@ -51,6 +52,9 @@ export class UsersListComponent implements OnInit, OnDestroy {
       name: 'Lisa Nuor',
       email: 'lisa@domainname.com'
     });
+  }
+  public updateSelectedArr(): void {
+    this.selectedUsers = this.usersView.filter(data => data.selected === true);
   }
   private getUsers(): void {
     this.usersOrigin = Users.map(user => ({ id: user.id, name: user.name, email: user.email }));
