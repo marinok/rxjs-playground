@@ -14,6 +14,6 @@ Run `npm install`. Run `ng serve` for a dev server. Navigate to `http://localhos
 
 ### Learning courses
 
-- [Video tutorials](https://www.youtube.com/playlist?list=PL55RiY5tL51pHpagYcrN9ubNLVXF8rGVi) from awesome Maximilian Schwarzmüller
+- [Video tutorials](https://www.youtube.com/playlist?list=PL55RiY5tL51pHpagYcrN9ubNLVXF8rGVi) by awesome Maximilian Schwarzmüller
 - New posts on [Twitter](https://twitter.com/hashtag/rxjs)
 
