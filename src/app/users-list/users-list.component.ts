@@ -48,7 +48,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   public userTrackByFn = (i, user) => user.id;
 
-  public onEmailInput(event, userId) {
+  public onEmailInput(event, userId): void {
     const user = this.getUsers.find(u => u.id === userId);
     if (user) {
       user.email = event.target.value;
@@ -56,9 +56,14 @@ export class UsersListComponent implements OnInit, OnDestroy {
     }
   }
 
-  public addUser() {
+  public addUser(): void {
     Users.push({ ...this.newUser, id: uuid() });
     this.setUsers = [...Users];
+  }
+
+  public saveChanges(): void {
+    console.log(this.getUsers);
+    this.setUsers = [...this.getUsers];
   }
 
   ngOnDestroy() { }
