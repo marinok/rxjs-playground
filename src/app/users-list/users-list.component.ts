@@ -20,59 +20,47 @@ export class UsersListComponent implements OnInit, OnDestroy {
   private usersSubject_ = new BehaviorSubject<UserView[]>(
     Users.map(u => ({ ...u, selected: false }))
   );
-
-  userTrackByFn = (i, user) => user.id;
-
-
-  newUser: User = {
+  public newUser: User = {
     id: uuid(),
     email: "azero79@gmail.com",
     name: "Aslan"
   };
-  users$ = this.usersSubject_.asObservable();
+  public users$: Observable<UserView[]> = this.usersSubject_.asObservable();
+  public usersChanged$: Observable<Boolean>;
 
   get getUsers() {
     return this.usersSubject_.getValue();
   }
-
   set setUsers(users: UserView[]) {
     this.usersSubject_.next(users);
   }
 
-  usersChanged$ = this.users$.pipe(
-    map(users => {
-      const reset = users.map(u => ({ id: u.id, name: u.name, email: u.email }));
-      return JSON.stringify(reset) !== JSON.stringify(Users);
-    })
-  );
-
-  constructor() { }
+  constructor() {
+    this.usersChanged$ = this.users$.pipe(
+      map(users => {
+        const reset = users.map(u => ({ id: u.id, name: u.name, email: u.email }));
+        return JSON.stringify(reset) !== JSON.stringify(Users);
+      })
+    );
+  }
 
   ngOnInit() { }
 
-  arraysAreEqual(ary1, ary2) {
-    return (ary1.join('') === ary2.join(''));
-  }
+  public userTrackByFn = (i, user) => user.id;
 
-  addUser() {
-
-    Users.push({ id: uuid(), ...this.newUser });
-    this.setUsers = [...Users];
-
-  }
-
-  ngOnDestroy() { }
-
-  //////////////////////////////////
-
-  onEmailInput(event, userId) {
-
+  public onEmailInput(event, userId) {
     const user = this.getUsers.find(u => u.id === userId);
     if (user) {
       user.email = event.target.value;
       this.setUsers = [...this.getUsers];
     }
-
   }
+
+  public addUser() {
+    Users.push({ ...this.newUser, id: uuid() });
+    this.setUsers = [...Users];
+  }
+
+  ngOnDestroy() { }
 
 }

@@ -13,11 +13,12 @@
     <button mat-stroked-button color="primary" [disabled]="!(usersChanged$ | async)">Save changes</button>
     <button mat-stroked-button color="primary" class="ml8" (click)="addUser()">Add user</button>
   </div>
+  <div class="ml16">
+    <pre>
+{{users$ | async | json}}
+    </pre>
+  </div>
   <ul class="ml16">
     <!-- <li *ngFor="let selectedUser of selectedUsers">{{selectedUser.name}}</li> -->
   </ul>
 </div>
-
-<pre>
-{{users$ | async | json}}
-</pre>
