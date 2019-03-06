@@ -62,11 +62,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   }
   private getUsersView(): Observable<UserView[]> {
     return of(Users).pipe(
-      mergeMap(item => item),
-      map(user => {
-        return { ...user, selected: false };
-      }),
-      toArray(),
+      map(users => users.map(user => ({ ...user, select: false }))),
       catchError(error => throwError('Error ' + error)));
   }
 
