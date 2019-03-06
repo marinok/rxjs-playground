@@ -1,69 +1,78 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { User } from '../models/user';
-import { Observable, of, from, Subject, throwError } from 'rxjs';
-import { map, mergeMap, toArray, filter, takeUntil, catchError } from 'rxjs/operators';
+import { Observable, of, from, Subject, throwError, BehaviorSubject } from 'rxjs';
+import { map, tap, mergeMap, toArray, filter, takeUntil, catchError } from 'rxjs/operators';
 import { Users } from '../services/users';
 import { v4 as uuid } from 'uuid';
+
 interface UserView extends User {
   selected?: boolean;
 }
 @Component({
   selector: 'app-users-list',
   templateUrl: './users-list.component.html',
-  styleUrls: ['./users-list.component.less']
+  styleUrls: ['./users-list.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UsersListComponent implements OnInit, OnDestroy {
-  public selectedUsers: Array<UserView>;
-  public users$: Observable<UserView[]>;
-  public users: Array<UserView>;
-  public usersView: Array<UserView>;
-  public usersArrNotChanged: boolean = true;
 
-  private usersOrigin: Array<UserView>;
-  private ngUnsubscribe = new Subject();
+export class UsersListComponent implements OnInit, OnDestroy {
+
+  private usersSubject_ = new BehaviorSubject<UserView[]>(
+    Users.map(u => ({ ...u, selected: false }))
+  );
+
+  userTrackByFn = (i, user) => user.id;
+
+
+  newUser: User = {
+    id: uuid(),
+    email: "azero79@gmail.com",
+    name: "Aslan"
+  };
+  users$ = this.usersSubject_.asObservable();
+
+  get getUsers() {
+    return this.usersSubject_.getValue();
+  }
+
+  set setUsers(users: UserView[]) {
+    this.usersSubject_.next(users);
+  }
+
+  usersChanged$ = this.users$.pipe(
+    map(users => {
+      const reset = users.map(u => ({ id: u.id, name: u.name, email: u.email }));
+      return JSON.stringify(reset) !== JSON.stringify(Users);
+    })
+  );
 
   constructor() { }
 
-  ngOnInit() {
-    this.getUsers();
-    this.users$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(data => {
-      this.users = data;
-    });
+  ngOnInit() { }
 
-    this.getUsersView().subscribe(item => {
-      console.log('item', item);
-      this.usersView = item;
-    });
+  arraysAreEqual(ary1, ary2) {
+    return (ary1.join('') === ary2.join(''));
   }
-  ngOnDestroy() {
-    this.ngUnsubscribe.next();
-    this.ngUnsubscribe.complete();
+
+  addUser() {
+
+    Users.push({ id: uuid(), ...this.newUser });
+    this.setUsers = [...Users];
+
   }
-  public compareArrays(): void {
-    this.usersArrNotChanged = JSON.stringify(this.users) === JSON.stringify(this.usersOrigin);
-  }
-  public saveChanges(): void {
-    this.usersOrigin = this.users.map(user => ({ id: user.id, name: user.name, email: user.email }));
-    this.compareArrays();
-  }
-  public addUser(): void {
-    Users.push({
-      id: uuid(),
-      name: 'Lisa Nuor',
-      email: 'lisa@domainname.com'
-    });
-  }
-  public updateSelectedArr(): void {
-    this.selectedUsers = this.usersView.filter(data => data.selected === true);
-  }
-  private getUsers(): void {
-    this.usersOrigin = Users.map(user => ({ id: user.id, name: user.name, email: user.email }));
-    this.users$ = of(Users);
-  }
-  private getUsersView(): Observable<UserView[]> {
-    return of(Users).pipe(
-      map(users => users.map(user => ({ ...user, select: false }))),
-      catchError(error => throwError('Error ' + error)));
+
+  ngOnDestroy() { }
+
+  //////////////////////////////////
+
+  onEmailInput(event, userId) {
+
+    const user = this.getUsers.find(u => u.id === userId);
+    if (user) {
+      user.email = event.target.value;
+      this.setUsers = [...this.getUsers];
+    }
+
   }
 
 }
